@@ -1,0 +1,9 @@
+MyTests/
+gmon.out
+lua
+luac
+tags
+*.o
+*.swp
+*~
+
