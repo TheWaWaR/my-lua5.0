@@ -12,7 +12,7 @@
 #include "lstate.h"
 
 
-
+/* (weet: TString + str+'\0') */
 #define sizestring(l)	(cast(lu_mem, sizeof(union TString))+ \
                          (cast(lu_mem, l)+1)*sizeof(char))
 

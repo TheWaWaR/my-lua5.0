@@ -28,6 +28,7 @@
 typedef long sint32;	/* a signed version for size_t */
 
 
+/* (weet: 作为主要参数的字符串位于栈中位置为1的地方(也就是栈底) */
 static int str_len (lua_State *L) {
   size_t l;
   luaL_checklstring(L, 1, &l);
@@ -44,9 +45,9 @@ static sint32 posrelat (sint32 pos, size_t len) {
 
 static int str_sub (lua_State *L) {
   size_t l;
-  const char *s = luaL_checklstring(L, 1, &l);
-  sint32 start = posrelat(luaL_checklong(L, 2), l);
-  sint32 end = posrelat(luaL_optlong(L, 3, -1), l);
+  const char *s = luaL_checklstring(L, 1, &l); // First argument ==> string::target
+  sint32 start = posrelat(luaL_checklong(L, 2), l); // Second argument ==> long::start
+  sint32 end = posrelat(luaL_optlong(L, 3, -1), l); // Third argument ==> long::end
   if (start < 1) start = 1;
   if (end > (sint32)l) end = (sint32)l;
   if (start <= end)
@@ -756,7 +757,7 @@ static const luaL_reg strlib[] = {
   {"find", str_find},
   {"gfind", gfind},
   {"gsub", str_gsub},
-  {NULL, NULL}
+  {NULL, NULL}  /* (weet: 啊哈，这个是必要的) */
 };
 
 

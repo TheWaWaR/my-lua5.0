@@ -54,7 +54,7 @@ typedef struct GCheader {
 /*
 ** Union of all Lua values
 */
-/* (weet:至少8字节) */
+/* (weet:8字节) */
 typedef union {
   GCObject *gc;					/* GCObject指针 */
   void *p;						/* 通用指针 */
@@ -162,6 +162,7 @@ typedef struct lua_TObject {
     o1->tt=o2->tt; o1->value = o2->value; }
 
 
+#define setttype(obj, tt) (ttype(obj) = (tt))
 /*
 ** different types of sets, according to destination
 */
@@ -283,7 +284,7 @@ typedef struct UpVal {
 typedef struct CClosure {
   ClosureHeader;
   lua_CFunction f;				/* (weet:一个参数为(lua_State *L), 返回值为(int)的函数) */
-  TObject upvalue[1];
+  TObject upvalue[1]; /* (weet:长度为1的数组既得到了指针又得到了相应的内存) */
 } CClosure;
 
 /* (weet:Lua闭包？) */

@@ -57,7 +57,7 @@ static TObject *negindex (lua_State *L, int idx) {
       TObject *func = (L->base - 1);
       idx = LUA_GLOBALSINDEX - idx;
       lua_assert(iscfunction(func));
-      return (idx <= clvalue(func)->c.nupvalues)
+      return (idx <= clvalue(func)->c.nupvalues) /* (weet: 哈哈, 原来lua把闭包变量放在这个地方!! */
                 ? &clvalue(func)->c.upvalue[idx-1]
                 : NULL;
     }
@@ -80,7 +80,7 @@ static TObject *luaA_index (lua_State *L, int idx) {
 
 static TObject *luaA_indexAcceptable (lua_State *L, int idx) {
   if (idx > 0) {
-    TObject *o = L->base+(idx-1);
+    TObject *o = L->base+(idx-1); // 从栈底开始
     api_check(L, idx <= L->stack_last - L->base);
     if (o >= L->top) return NULL;
     else return o;
@@ -396,8 +396,11 @@ LUA_API void lua_pushnil (lua_State *L) {
 
 LUA_API void lua_pushnumber (lua_State *L, lua_Number n) {
   lua_lock(L);
-  setnvalue(L->top, n);
+
+  /* 先设置top的值再增加top指针，说明top指向的值是待填充的*/
+  setnvalue(L->top, n); 
   api_incr_top(L);
+
   lua_unlock(L);
 }
 

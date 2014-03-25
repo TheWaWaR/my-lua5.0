@@ -34,6 +34,7 @@ const TObject luaO_nilobject = {LUA_TNIL, {NULL}};
 ** converts an integer to a "floating point byte", represented as
 ** (mmmmmxxx), where the real value is (xxx) * 2^(mmmmm)
 */
+/* (weet: 有什么用?) */
 int luaO_int2fb (unsigned int x) {
   int m = 0;  /* mantissa */
   while (x >= (1<<3)) {
@@ -59,9 +60,9 @@ int luaO_log2 (unsigned int x) {
     7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
     7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7
   };
-  if (x >= 0x00010000) {
-    if (x >= 0x01000000) return log_8[((x>>24) & 0xff) - 1]+24;
-    else return log_8[((x>>16) & 0xff) - 1]+16;
+  if (x >= 0x00010000) { // x >= 16
+    if (x >= 0x01000000) return log_8[((x>>24) & 0xff) - 1]+24; // x >= 64
+    else return log_8[((x>>16) & 0xff) - 1]+16;  // 16 <= x < 64
   }
   else {
     if (x >= 0x00000100) return log_8[((x>>8) & 0xff) - 1]+8;
@@ -89,6 +90,9 @@ int luaO_rawequalObj (const TObject *t1, const TObject *t2) {
 }
 
 
+/* (weet:
+ * 将一个字符串转换成double
+ * 返回值: 状态码) */
 int luaO_str2d (const char *s, lua_Number *result) {
   char *endptr;
   lua_Number res = lua_str2number(s, &endptr);

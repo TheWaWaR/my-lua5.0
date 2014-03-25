@@ -59,6 +59,7 @@ typedef int (*lua_Chunkwriter) (lua_State *L, const void* p,
 ** basic types
 */
 /* (weet:Lua的基础数据类型) */
+
 #define LUA_TNONE	(-1)
 
 #define LUA_TNIL	0

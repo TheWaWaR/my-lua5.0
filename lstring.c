@@ -18,12 +18,20 @@
 
 
 
+/* (weet:
+ * 如果字符串哈稀表为空则释放相应内存, 几乎不会出现吧?...)
+ * */
 void luaS_freeall (lua_State *L) {
   lua_assert(G(L)->strt.nuse==0);
   luaM_freearray(L, G(L)->strt.hash, G(L)->strt.size, TString *);
 }
 
 
+/* (weet:
+ * 1. 申请内存供新表使用
+ * 2. 对原哈稀表的所有对象重新映射到新表
+ * 3. 释放原表内存并更新 stringtable 相关字段)
+ * */
 void luaS_resize (lua_State *L, int newsize) {
   GCObject **newhash = luaM_newvector(L, newsize, GCObject *);
   stringtable *tb = &G(L)->strt;
@@ -48,6 +56,11 @@ void luaS_resize (lua_State *L, int newsize) {
 }
 
 
+/* (weet: 
+ * 1. 分配内存
+ * 2. 填充数据结构
+ * 3. 添加到全局的字符串哈稀表中
+ * */
 static TString *newlstr (lua_State *L, const char *str, size_t l, lu_hash h) {
   TString *ts = cast(TString *, luaM_malloc(L, sizestring(l)));
   stringtable *tb;
@@ -69,6 +82,11 @@ static TString *newlstr (lua_State *L, const char *str, size_t l, lu_hash h) {
 }
 
 
+/* (weet:
+ * 1. 计算字符串hash 
+ * 2. 使用hash从stringtable中查找相应对象
+ * 3. 如果找到即返回，找不到就创建一个新的)
+ * */
 TString *luaS_newlstr (lua_State *L, const char *str, size_t l) {
   GCObject *o;
   lu_hash h = (lu_hash)l;  /* seed */

@@ -52,6 +52,7 @@ const TObject *luaV_tonumber (const TObject *obj, TObject *n) {
 }
 
 
+/* (weet: convert number to string)*/
 int luaV_tostring (lua_State *L, StkId obj) {
   if (!ttisnumber(obj))
     return 0;
