@@ -158,7 +158,9 @@ LUA_API int lua_gettop (lua_State *L) {
   return (L->top - L->base);
 }
 
-
+/* weet:
+ * set stack top to `L->base + idex`, then there are `idx` arguments.
+ * */
 LUA_API void lua_settop (lua_State *L, int idx) {
   lua_lock(L);
   if (idx >= 0) {
@@ -303,7 +305,7 @@ LUA_API lua_Number lua_tonumber (lua_State *L, int idx) {
 
 LUA_API int lua_toboolean (lua_State *L, int idx) {
   const TObject *o = luaA_indexAcceptable(L, idx);
-  return (o != NULL) && !l_isfalse(o);
+  return (o != NULL) && !l_isfalse(o); // weet: 这个处理方式有意思.
 }
 
 
@@ -829,13 +831,16 @@ LUA_API int lua_next (lua_State *L, int idx) {
 }
 
 
+/* weet:
+ * 1. 把所有放在临时栈顶的TString连接起来放在真正的栈顶
+ * 2. 让栈顶指针 L->top 指向真正的位置*/
 LUA_API void lua_concat (lua_State *L, int n) {
   lua_lock(L);
   luaC_checkGC(L);
   api_checknelems(L, n);
   if (n >= 2) {
-    luaV_concat(L, n, L->top - L->base - 1);
-    L->top -= (n-1);
+    luaV_concat(L, n, L->top - L->base - 1); // 压缩 TString
+    L->top -= (n-1); // 让栈顶指针指向真正的位置
   }
   else if (n == 0) {  /* push empty string */
     setsvalue2s(L->top, luaS_newlstr(L, NULL, 0));

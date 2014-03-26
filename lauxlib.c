@@ -163,6 +163,10 @@ LUALIB_API void luaL_checkany (lua_State *L, int narg) {
 }
 
 
+/* weet:
+ * 1. 从栈中取出字符串
+ * 2. 计算字符串长度
+ * */
 LUALIB_API const char *luaL_checklstring (lua_State *L, int narg, size_t *len) {
   const char *s = lua_tostring(L, narg);
   if (!s) tag_error(L, narg, LUA_TSTRING);
@@ -334,6 +338,10 @@ int luaL_getn (lua_State *L, int t) {
 #define LIMIT	(LUA_MINSTACK/2)
 
 
+/* weet: 
+ * 1. 用buffer中的字符串生成一个TString放到栈顶
+ * 2. 然后清空buffer
+ * */
 static int emptybuffer (luaL_Buffer *B) {
   size_t l = bufflen(B);
   if (l == 0) return 0;  /* put nothing on stack */
@@ -353,7 +361,7 @@ static void adjuststack (luaL_Buffer *B) {
     size_t toplen = lua_strlen(L, -1);
     do {
       size_t l = lua_strlen(L, -(toget+1));
-      if (B->lvl - toget + 1 >= LIMIT || toplen > l) {
+      if (B->lvl - toget + 1 >= LIMIT || toplen > l) { // weet: 看不懂啊，看不懂!!!
         toplen += l;
         toget++;
       }
@@ -372,6 +380,7 @@ LUALIB_API char *luaL_prepbuffer (luaL_Buffer *B) {
 }
 
 
+/* weet: copy string `s` to buffer `B` by length `l`, 有可能buffer会满，然后需要栈来转储. */
 LUALIB_API void luaL_addlstring (luaL_Buffer *B, const char *s, size_t l) {
   while (l--)
     luaL_putchar(B, *s++);
@@ -383,6 +392,11 @@ LUALIB_API void luaL_addstring (luaL_Buffer *B, const char *s) {
 }
 
 
+/* weet:
+ * 1. 将buffer中的字符串存到栈中
+ * 2. 将栈中的所有TString连接起来
+ * 3. 最后栈顶的值作为函数的返回值
+ * */
 LUALIB_API void luaL_pushresult (luaL_Buffer *B) {
   emptybuffer(B);
   lua_concat(B->L, B->lvl);

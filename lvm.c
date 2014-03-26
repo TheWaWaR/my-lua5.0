@@ -323,7 +323,7 @@ void luaV_concat (lua_State *L, int total, int last) {
     } else if (tsvalue(top-1)->tsv.len > 0) {  /* if len=0, do nothing */
       /* at least two string values; get as many as possible */
       lu_mem tl = cast(lu_mem, tsvalue(top-1)->tsv.len) +
-                  cast(lu_mem, tsvalue(top-2)->tsv.len);
+                  cast(lu_mem, tsvalue(top-2)->tsv.len); // weet: 顶部两个字符串的长度和
       char *buffer;
       int i;
       while (n < total && tostring(L, top-n-1)) {  /* collect total length */

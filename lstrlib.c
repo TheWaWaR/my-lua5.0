@@ -37,6 +37,7 @@ static int str_len (lua_State *L) {
 }
 
 
+/* weet: 处理相对位置 */
 static sint32 posrelat (sint32 pos, size_t len) {
   /* relative string position: negative means back from end */
   return (pos>=0) ? pos : (sint32)len+pos+1;
@@ -82,6 +83,7 @@ static int str_upper (lua_State *L) {
   return 1;
 }
 
+/* weet: 复制字符串...... (Repeat) */
 static int str_rep (lua_State *L) {
   size_t l;
   luaL_Buffer b;
@@ -128,6 +130,7 @@ static int writer (lua_State *L, const void* b, size_t size, void* B) {
 }
 
 
+/* weet: 将一个函数对象序列化 */
 static int str_dump (lua_State *L) {
   luaL_Buffer b;
   luaL_checktype(L, 1, LUA_TFUNCTION);
@@ -540,11 +543,11 @@ static int gfind_aux (lua_State *L) {
 
 
 static int gfind (lua_State *L) {
-  luaL_checkstring(L, 1);
-  luaL_checkstring(L, 2);
-  lua_settop(L, 2);
-  lua_pushnumber(L, 0);
-  lua_pushcclosure(L, gfind_aux, 3);
+  luaL_checkstring(L, 1); // weet: No.1
+  luaL_checkstring(L, 2); // weet: No.2
+  lua_settop(L, 2);       // weet: 重置栈顶
+  lua_pushnumber(L, 0);   // weet: No.3
+  lua_pushcclosure(L, gfind_aux, 3); // weet: No.4
   return 1;
 }
 
@@ -673,9 +676,10 @@ static const char *scanformat (lua_State *L, const char *strfrmt,
   if (p-strfrmt+2 > MAX_FORMAT)  /* +2 to include `%' and the specifier */
     luaL_error(L, "invalid format (too long)");
   form[0] = '%';
-  strncpy(form+1, strfrmt, p-strfrmt+1);
+  strncpy(form+1, strfrmt, p-strfrmt+1); // weet: "3.4f", "4d", etc.
   form[p-strfrmt+2] = 0;
-  return p;
+  // weet: form ==> "%3.4f\0", "%4d\n", etc.
+  return p; // weet: 现在p指向那个英文字符
 }
 
 
@@ -735,10 +739,10 @@ static int str_format (lua_State *L) {
         default: {  /* also treat cases `pnLlh' */
           return luaL_error(L, "invalid option to `format'");
         }
-      }
+      } // switch
       luaL_addlstring(&b, buff, strlen(buff));
-    }
-  }
+    } // if else ...
+  } // while()
   luaL_pushresult(&b);
   return 1;
 }
@@ -753,7 +757,7 @@ static const luaL_reg strlib[] = {
   {"rep", str_rep},
   {"byte", str_byte},
   {"format", str_format},
-  {"dump", str_dump},
+  {"dump", str_dump}, // weet: 将一个函数对象序列化
   {"find", str_find},
   {"gfind", gfind},
   {"gsub", str_gsub},
