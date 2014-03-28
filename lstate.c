@@ -45,6 +45,9 @@ static int default_panic (lua_State *L) {
 }
 
 
+/* weet:
+ * 为 lua_State 申请内存
+ * */
 static lua_State *mallocstate (lua_State *L) {
   lu_byte *block = (lu_byte *)luaM_malloc(L, sizeof(lua_State) + EXTRASPACE);
   if (block == NULL) return NULL;
@@ -61,15 +64,24 @@ static void freestate (lua_State *L, lua_State *L1) {
 }
 
 
+/* weet:
+ * 1. 分配栈(stack)内存并设置栈指针变量
+ * 2. 分配CallInfo内存并设置相应的指针变量
+ * */
 static void stack_init (lua_State *L1, lua_State *L) {
+    // weet: BASIC_STACK_SIZE + EXTRA_STACK == 40 + 5 == 45
   L1->stack = luaM_newvector(L, BASIC_STACK_SIZE + EXTRA_STACK, TObject);
   L1->stacksize = BASIC_STACK_SIZE + EXTRA_STACK;
   L1->top = L1->stack;
-  L1->stack_last = L1->stack+(L1->stacksize - EXTRA_STACK)-1;
-  L1->base_ci = luaM_newvector(L, BASIC_CI_SIZE, CallInfo);
+  L1->stack_last = L1->stack+(L1->stacksize - EXTRA_STACK)-1; // weet: 除了 EXTRA_STACK 的最后一个位置
+
+  L1->base_ci = luaM_newvector(L, BASIC_CI_SIZE, CallInfo); // weet: BASIC_CI_SIZE == 8
   L1->ci = L1->base_ci;
   L1->ci->state = CI_C;  /*  not a Lua function */
-  setnilvalue(L1->top++);  /* `function' entry for this `ci' */
+
+  // weet: 也就是 (L->base - 1)
+  setnilvalue(L1->top++);  /* `function' entry for this `ci' */  
+
   L1->base = L1->ci->base = L1->top;
   L1->ci->top = L1->top + LUA_MINSTACK;
   L1->size_ci = BASIC_CI_SIZE;
@@ -123,6 +135,9 @@ static void f_luaopen (lua_State *L, void *ud) {
 }
 
 
+/* weet:
+ * 初始化lua_State
+ * */
 static void preinit_state (lua_State *L) {
   L->stack = NULL;
   L->stacksize = 0;
@@ -131,7 +146,7 @@ static void preinit_state (lua_State *L) {
   L->hookmask = L->hookinit = 0;
   L->basehookcount = 0;
   L->allowhook = 1;
-  resethookcount(L);
+  resethookcount(L); // (L->hookcount = L->basehookcount)
   L->openupval = NULL;
   L->size_ci = 0;
   L->nCcalls = 0;
@@ -158,7 +173,11 @@ static void close_state (lua_State *L) {
   freestate(NULL, L);
 }
 
-
+/* weet:
+ * 1. 新建一个协程,
+ * 2. 加入到父lua_State的GC链表中
+ * 3. 初始化新的 lua_State
+ * */
 lua_State *luaE_newthread (lua_State *L) {
   lua_State *L1 = mallocstate(L);
   luaC_link(L, valtogco(L1), LUA_TTHREAD);

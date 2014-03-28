@@ -44,7 +44,10 @@ const char lua_ident[] =
 
 
 
-
+/* weet:
+ * 1. 用负值索引找栈中的对象
+ * 2. 可以看出一些栈的设计思路
+ * */
 static TObject *negindex (lua_State *L, int idx) {
   if (idx > LUA_REGISTRYINDEX) {
     api_check(L, idx != 0 && -idx <= L->top - L->base);
@@ -65,6 +68,9 @@ static TObject *negindex (lua_State *L, int idx) {
 }
 
 
+/* weet:
+ * 索引在栈中的TObject
+ * */
 static TObject *luaA_index (lua_State *L, int idx) {
   if (idx > 0) {
     api_check(L, idx <= L->top - L->base);
@@ -77,7 +83,10 @@ static TObject *luaA_index (lua_State *L, int idx) {
   }
 }
 
-
+/* weet:
+ * 1. 索引在栈中的TObject
+ * 2. 不知道和上面的方法有什么区别???
+ * */
 static TObject *luaA_indexAcceptable (lua_State *L, int idx) {
   if (idx > 0) {
     TObject *o = L->base+(idx-1); // 从栈底开始
@@ -89,7 +98,9 @@ static TObject *luaA_indexAcceptable (lua_State *L, int idx) {
     return negindex(L, idx);
 }
 
-
+/* weet:
+ * 往栈中压入一个对象
+ * */
 void luaA_pushobject (lua_State *L, const TObject *o) {
   setobj2s(L->top, o);
   incr_top(L);
@@ -112,6 +123,9 @@ LUA_API int lua_checkstack (lua_State *L, int size) {
 }
 
 
+/* weet:
+ * 将一个栈顶的n个元素拷贝到另一个栈
+ * */
 LUA_API void lua_xmove (lua_State *from, lua_State *to, int n) {
   int i;
   lua_lock(to);
@@ -125,6 +139,9 @@ LUA_API void lua_xmove (lua_State *from, lua_State *to, int n) {
 }
 
 
+/* weet:
+ * 更新global_State中的panic函数
+ * */
 LUA_API lua_CFunction lua_atpanic (lua_State *L, lua_CFunction panicf) {
   lua_CFunction old;
   lua_lock(L);
@@ -134,7 +151,9 @@ LUA_API lua_CFunction lua_atpanic (lua_State *L, lua_CFunction panicf) {
   return old;
 }
 
-
+/* weet:
+ * 创建一个新的Lua协程
+ * */
 LUA_API lua_State *lua_newthread (lua_State *L) {
   lua_State *L1;
   lua_lock(L);
@@ -143,7 +162,7 @@ LUA_API lua_State *lua_newthread (lua_State *L) {
   setthvalue(L->top, L1);
   api_incr_top(L);
   lua_unlock(L);
-  lua_userstateopen(L1);
+  lua_userstateopen(L1); // weet: 一个空的宏
   return L1;
 }
 
@@ -154,12 +173,15 @@ LUA_API lua_State *lua_newthread (lua_State *L) {
 */
 
 
+/* weet:
+ * 栈中对象(参数)的个数.
+ * */
 LUA_API int lua_gettop (lua_State *L) {
   return (L->top - L->base);
 }
 
 /* weet:
- * set stack top to `L->base + idex`, then there are `idx` arguments.
+ * 让栈顶指针指向 `L->base + idex`, 然后参数个数变为`idx`个.
  * */
 LUA_API void lua_settop (lua_State *L, int idx) {
   lua_lock(L);
@@ -177,16 +199,23 @@ LUA_API void lua_settop (lua_State *L, int idx) {
 }
 
 
+/* weet:
+ * 移除位于idx的栈元素
+ * */
 LUA_API void lua_remove (lua_State *L, int idx) {
   StkId p;
   lua_lock(L);
   p = luaA_index(L, idx);
-  while (++p < L->top) setobjs2s(p-1, p);
+  // weet: 那个被删除元素的内存是在什么时候被释放的呢? 需要通过什么条件来判断?
+  while (++p < L->top) setobjs2s(p-1, p); 
   L->top--;
   lua_unlock(L);
 }
 
 
+/* weet:
+ * 从idx 到(L->top - 1)的元素向上移动一个位置
+ * */
 LUA_API void lua_insert (lua_State *L, int idx) {
   StkId p;
   StkId q;
@@ -198,6 +227,10 @@ LUA_API void lua_insert (lua_State *L, int idx) {
 }
 
 
+/* weet:
+ * 1. 将idx所在位置设置为当前栈顶元素
+ * 2. 栈顶指针下移一个
+ * */
 LUA_API void lua_replace (lua_State *L, int idx) {
   lua_lock(L);
   api_checknelems(L, 1);
@@ -207,6 +240,10 @@ LUA_API void lua_replace (lua_State *L, int idx) {
 }
 
 
+/* weet:
+ * 1. 将idx所在位置的元素复制到栈顶
+ * 2. 增加栈顶指针
+ * */
 LUA_API void lua_pushvalue (lua_State *L, int idx) {
   lua_lock(L);
   setobj2s(L->top, luaA_index(L, idx));

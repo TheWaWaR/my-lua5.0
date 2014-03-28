@@ -483,7 +483,10 @@ void luaC_collectgarbage (lua_State *L) {
   luaC_callGCTM(L);
 }
 
-
+/* weet:
+ * 1. 将一个新的 GCObject 添加到 lua_State 中的 gch 链表中
+ * 2. 设置GC标记变量和类型
+ * */
 void luaC_link (lua_State *L, GCObject *o, lu_byte tt) {
   o->gch.next = G(L)->rootgc;
   G(L)->rootgc = o;

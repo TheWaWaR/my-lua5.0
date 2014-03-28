@@ -99,6 +99,7 @@ typedef LUA_NUMBER lua_Number;
 
 /* mark for all API functions */
 #ifndef LUA_API
+// weet: 这里的 extern 相当与 Erlang 中的 export, 让该函数被外部可见
 #define LUA_API		extern
 #endif
 

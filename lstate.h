@@ -24,6 +24,9 @@
 ** or when reading immutable fields from global objects
 ** (such as string values and udata values). 
 */
+/* weet:
+ * 太神奇了..... 这个真的可以起到锁的效果？？？
+ * */
 #ifndef lua_lock
 #define lua_lock(L)	((void) 0)
 #endif
@@ -58,6 +61,7 @@ struct lua_longjmp;  /* defined in ldo.c */
 
 #define BASIC_CI_SIZE           8
 
+// weet: LUA_MINSTACK==20
 #define BASIC_STACK_SIZE        (2*LUA_MINSTACK)
 
 
