@@ -328,7 +328,11 @@ LUA_API int lua_lessthan (lua_State *L, int index1, int index2) {
   return i;
 }
 
-
+////////////////////// BEGIN `lua_to` ///////////////////////
+/* weet: 
+ * 1. 从栈中拿出指定位置的元素
+ * 2. 强制转换到指定的类型并返回
+ * */
 
 LUA_API lua_Number lua_tonumber (lua_State *L, int idx) {
   TObject n;
@@ -417,6 +421,7 @@ LUA_API const void *lua_topointer (lua_State *L, int idx) {
     }
   }
 }
+////////////////////// END `lua_to` ///////////////////////
 
 
 
