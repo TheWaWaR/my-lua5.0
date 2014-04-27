@@ -8,8 +8,8 @@ CFLAGS= -Wall -O1 -pg
 T= lua
 
 all:	$T luac
-	./$T test.lua
-	./luac -l test.lua
+	./$T tests-Lua/test.lua
+	./luac -l tests-Lua/test.lua
 
 $T:	$(OBJS)
 	$(CC) -pg -o $@ $(OBJS) -lm

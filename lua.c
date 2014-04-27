@@ -426,22 +426,22 @@ static int pmain (lua_State *l) {
 int main (int argc, char *argv[]) {
   int status;
   struct Smain s;
-  fprintf(stdout, "%s", "::before lua_open();\n");
+  /*fprintf(stdout, "%s", "::before lua_open();\n");*/
   lua_State *l = lua_open();  /* create state */
-  fprintf(stdout, "%s", "::after lua_open();\n");
+  /*fprintf(stdout, "%s", "::after lua_open();\n");*/
   if (l == NULL) {
     l_message(argv[0], "cannot create state: not enough memory");
     return EXIT_FAILURE;
   }
   s.argc = argc;
   s.argv = argv;
-  fprintf(stdout, "%s", "::before lua_cpcall();\n");
+  /*fprintf(stdout, "%s", "::before lua_cpcall();\n");*/
   status = lua_cpcall(l, &pmain, &s);
-  fprintf(stdout, "%s", "::after lua_cpcall();\n");
+  /*fprintf(stdout, "%s", "::after lua_cpcall();\n");*/
   report(status);
-  fprintf(stdout, "%s", "::after report(status);\n");
+  /*fprintf(stdout, "%s", "::after report(status);\n");*/
   lua_close(l);
-  fprintf(stdout, "%s", "::after lua_close(l);\n");
+  /*fprintf(stdout, "%s", "::after lua_close(l);\n");*/
   return (status || s.status) ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
